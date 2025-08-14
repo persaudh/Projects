@@ -2,6 +2,8 @@ import smtplib
 from email.message import EmailMessage
 import os 
 from dotenv import load_dotenv
+from string import Template
+from pathlib import Path
 
 load_dotenv()
 
@@ -25,15 +27,24 @@ pwd = os.getenv("EmailPWD")
 #     smtp.sendmail(from_addr=email_from,to_addrs=email_to,msg=email_message) 
 #     print("Email Sent!")
 
+html = Template(Path("index.html").read_text())
+
 email_from = address
 email_to = address
-email_message = "subject:Testing automated email \n\n his is an email sent from Python!"
+email_message = html.substitute({"name":"TinTin"})
 
+email = EmailMessage()
+email["to"] = address
+email["from"] = address
+email["subject"] = "Testing Emails"
+
+email.set_content(email_message,"html")
 
 
 with smtplib.SMTP(host="smtp.gmail.com",port=587) as smtp:
     smtp.ehlo()
     smtp.starttls()
     smtp.login(address,pwd)
-    smtp.sendmail(from_addr=email_from,to_addrs=email_to,msg=email_message)
+    smtp.send_message(email)
+    #smtp.sendmail(from_addr=email_from,to_addrs=email_to,msg=email_message)
     print("Email Sent!")
